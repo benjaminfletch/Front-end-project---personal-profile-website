@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolton Town Festival</title>
+    <style>
+        /* Change these colours to match your festival */
+        body {
+            margin: 0;
+            background: #75c1d4;
+            color: #4ba2bd;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            padding: 50px 20px;
+            color: rgb(187, 117, 117);
+            background: #254b42;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 42px;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            max-width: 900px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 25px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px #00000018;
+        }
+
+        .bookings {
+            grid-column: 1 / -1;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #254b42;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 6px;
+            padding: 11px;
+            border: 1px solid #bbbbbb;
+            border-radius: 4px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 18px;
+            color: white;
+            background: #d45d42;
+            border: 0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #a9432f;
+        }
+
+        .message {
+            min-height: 22px;
+            color: #254b42;
+            font-weight: bold;
+        }
+
+        .booking-row {
+            padding: 12px 0;
+            border-bottom: 1px solid #dddddd;
+        }
+
+        @media (max-width: 650px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            .bookings {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bolton beats</h1>
+        <p>Local music, food and friends</p>
+        <p>Saturday 14 September 2026</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Book a ticket</h2>
+            <form id="bookingForm">
+                <label for="name">Full name</label>
+                <input id="name" type="text" required>
+
+                <label for="email">Email address</label>
+                <input id="email" type="email" required>
+
+                <button type="submit">Book ticket</button>
+            </form>
+            <p id="bookingMessage" class="message"></p>
+        </section>
+
+        <section>
+            <h2>Check in</h2>
+            <form id="checkInForm">
+                <label for="ticketCode">Ticket code</label>
+                <input id="ticketCode" type="text" placeholder="Example: SF12345" required>
+
+                <button type="submit">Check in</button>
+            </form>
+            <p id="checkInMessage" class="message"></p>
+        </section>
+
+        <section class="bookings">
+            <h2>Bookings</h2>
+            <div id="bookingList">No bookings yet.</div>
+        </section>
+    </main>
+
+    <script>
+        // This array stores customer and ticket information.
+        let bookings = [];
+
+        const bookingForm = document.getElementById("bookingForm");
+        const checkInForm = document.getElementById("checkInForm");
+        const bookingMessage = document.getElementById("bookingMessage");
+        const checkInMessage = document.getElementById("checkInMessage");
+        const bookingList = document.getElementById("bookingList");
+
+        // Creates a simple ticket code, such as SF12345.
+        function createTicketCode() {
+            const number = Math.floor(10000 + Math.random() * 90000);
+            return "SF" + number;
+        }
+
+        // Shows all bookings on the page.
+        function showBookings() {
+            if (bookings.length === 0) {
+                bookingList.innerHTML = "No bookings yet.";
+                return;
+            }
+
+            bookingList.innerHTML = "";
+
+            bookings.forEach(function (booking) {
+                const row = document.createElement("div");
+                row.className = "booking-row";
+                row.innerHTML = `
+                    <strong>${booking.name}</strong><br>
+                    ${booking.email}<br>
+                    Ticket: ${booking.ticketCode}<br>
+                    Status: ${booking.checkedIn ? "Checked in" : "Not checked in"}
+                `;
+                bookingList.appendChild(row);
+            });
+        }
+
+        // Runs when somebody books a ticket.
+        bookingForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const ticketCode = createTicketCode();
+
+            bookings.push({
+                name: name,
+                email: email,
+                ticketCode: ticketCode,
+                checkedIn: false
+            });
+
+            bookingMessage.textContent = "Booking confirmed. Your ticket code is " + ticketCode;
+            bookingForm.reset();
+            showBookings();
+        });
+
+        // Runs when somebody enters a ticket code.
+        checkInForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const enteredCode = document.getElementById("ticketCode").value.toUpperCase();
+            const booking = bookings.find(function (item) {
+                return item.ticketCode === enteredCode;
+            });
+
+            if (!booking) {
+                checkInMessage.textContent = "Ticket not found.";
+                return;
+            }
+
+            if (booking.checkedIn) {
+                checkInMessage.textContent = "This ticket has already been used.";
+                return;
+            }
+
+            booking.checkedIn = true;
+            checkInMessage.textContent = booking.name + " has been checked in.";
+            checkInForm.reset();
+            showBookings();
+        });
+
+        showBookings();
+    </script>
+</body>
+</html>
